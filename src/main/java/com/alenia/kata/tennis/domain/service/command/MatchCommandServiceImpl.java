@@ -57,45 +57,100 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Override
     public Match addPointToFirstPlayer(long matchId) throws TennisException {
         Match match = matchQueryService.findById(matchId);
+        if (isGameOver(match)) {
+            initNewGame(match);
+        }
         Game lastGame = TennisUtil.getLastGame(match);
-        isGameOver(lastGame);
-        int firstPlayerScore = lastGame.getFirstPlayerScore();
-        if (firstPlayerScore != SCORE_FORTY) {
-            lastGame.setFirstPlayerScore(addPoint(firstPlayerScore));
-        } else {
-            lastGame.setComment(FIRST_PLAYER_GAME);
-        }
+        addPoint(lastGame, 1);
         return matchRepository.save(match);
-    }
-
-    private void isGameOver(Game lastGame) throws TennisException {
-        if (lastGame.getComment() != null) {
-            throw new TennisException(GAME_WON_ERROR);
-        }
     }
 
     @Override
     public Match addPointToSecondPlayer(long matchId) throws TennisException {
         Match match = matchQueryService.findById(matchId);
-        Game lastGame = TennisUtil.getLastGame(match);
-        isGameOver(lastGame);
-        int secondPlayerScore = lastGame.getSecondPlayerScore();
-        if (secondPlayerScore != SCORE_FORTY) {
-            lastGame.setSecondPlayerScore(addPoint(secondPlayerScore));
-        } else {
-            lastGame.setComment(SECOND_PLAYER_GAME);
+        if (isGameOver(match)) {
+            initNewGame(match);
         }
+        Game lastGame = TennisUtil.getLastGame(match);
+        addPoint(lastGame, 2);
         return matchRepository.save(match);
     }
 
-    private int addPoint(int currentScore) {
-        switch (currentScore) {
+    @Override
+    public void initNewGame(Match match) {
+        Set lastSet = TennisUtil.getLastSet(match);
+        Game game = Game.builder()
+                .firstPlayerScore(SCORE_ZERO)
+                .secondPlayerScore(SCORE_ZERO)
+                .number(lastSet.getGames().size() + 1)
+                .build();
+        lastSet.getGames().add(game);
+    }
+
+    @Override
+    public boolean isGameOver(Match match) {
+        return TennisUtil.getLastGame(match).getComment() != null;
+    }
+
+    @Override
+    public void addPoint(Game lastGame, int player) {
+        if (player == 1) {
+            String score = calculateScore(lastGame, 1);
+            switch (score) {
+                case ADV:
+                    lastGame.setSecondPlayerScore(SCORE_FORTY);
+                    break;
+                case DEUCE:
+                    lastGame.setSecondPlayerScore(score);
+                    break;
+                case SCORE_ZERO:
+                    lastGame.setSecondPlayerScore(score);
+                    lastGame.setComment(FIRST_PLAYER_GAME);
+            }
+            lastGame.setFirstPlayerScore(score);
+        } else {
+            String score = calculateScore(lastGame, 2);
+            switch (score) {
+                case ADV:
+                    lastGame.setFirstPlayerScore(SCORE_FORTY);
+                    break;
+                case DEUCE:
+                    lastGame.setFirstPlayerScore(score);
+                    break;
+                case SCORE_ZERO:
+                    lastGame.setFirstPlayerScore(score);
+                    lastGame.setComment(SECOND_PLAYER_GAME);
+            }
+            lastGame.setSecondPlayerScore(score);
+        }
+    }
+
+    @Override
+    public String calculateScore(Game lastGame, int player) {
+        String score = player == 1 ? lastGame.getFirstPlayerScore() : lastGame.getSecondPlayerScore();
+        switch (score) {
             case SCORE_ZERO:
                 return SCORE_FIFTEEN;
             case SCORE_FIFTEEN:
                 return SCORE_THIRTY;
-            default:
+            case SCORE_THIRTY:
                 return SCORE_FORTY;
+            case DEUCE:
+                return ADV;
+            default:
+                return checkDeuce(lastGame, player);
+        }
+    }
+
+    @Override
+    public String checkDeuce(Game lastGame, int player) {
+        if (SCORE_FORTY.equals(lastGame.getFirstPlayerScore()) && SCORE_FORTY.equals(lastGame.getSecondPlayerScore())) {
+            return ADV;
+        } else if ((player == 1 && ADV.equals(lastGame.getSecondPlayerScore())) ||
+                (player == 2 && ADV.equals(lastGame.getFirstPlayerScore()))) {
+            return DEUCE;
+        } else {
+            return SCORE_ZERO;
         }
     }
 

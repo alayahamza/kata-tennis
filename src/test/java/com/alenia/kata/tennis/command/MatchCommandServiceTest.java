@@ -117,15 +117,24 @@ public class MatchCommandServiceTest {
     }
 
     @Test
+    public void should_return_FIFTEEN_when_addPoint() {
+        Game game = Game.builder()
+                .firstPlayerScore(SCORE_ZERO)
+                .secondPlayerScore(SCORE_FIFTEEN)
+                .build();
+        matchCommandService.addPoint(game, 1);
+        Assert.assertEquals(SCORE_FIFTEEN, game.getFirstPlayerScore());
+    }
+
+    @Test
     public void should_add_point_when_first_player_wins_a_point() throws TennisException {
         Mockito.when(matchRepository.findById(1)).thenReturn(Optional.ofNullable(match));
         Mockito.when(matchRepository.save(Mockito.any())).thenReturn(match);
         Match currentMatch = matchCommandService.addPointToFirstPlayer(1);
         Assert.assertEquals(SCORE_FIFTEEN, TennisUtil.getLastGame(currentMatch).getFirstPlayerScore());
-        TennisUtil.getLastGame(currentMatch).setFirstPlayerScore(SCORE_FORTY);
+        TennisUtil.getLastGame(currentMatch).setFirstPlayerScore(SCORE_THIRTY);
         currentMatch = matchCommandService.addPointToFirstPlayer(1);
         Assert.assertEquals(SCORE_FORTY, TennisUtil.getLastGame(currentMatch).getFirstPlayerScore());
-        Assert.assertEquals(FIRST_PLAYER_GAME, TennisUtil.getLastGame(currentMatch).getComment());
     }
 
     @Test
@@ -134,9 +143,55 @@ public class MatchCommandServiceTest {
         Mockito.when(matchRepository.save(Mockito.any())).thenReturn(match);
         Match currentMatch = matchCommandService.addPointToSecondPlayer(1);
         Assert.assertEquals(SCORE_FIFTEEN, TennisUtil.getLastGame(currentMatch).getSecondPlayerScore());
-        TennisUtil.getLastGame(currentMatch).setSecondPlayerScore(SCORE_FORTY);
+        TennisUtil.getLastGame(currentMatch).setSecondPlayerScore(SCORE_THIRTY);
         currentMatch = matchCommandService.addPointToSecondPlayer(1);
         Assert.assertEquals(SCORE_FORTY, TennisUtil.getLastGame(currentMatch).getSecondPlayerScore());
-        Assert.assertEquals(SECOND_PLAYER_GAME, TennisUtil.getLastGame(currentMatch).getComment());
+    }
+
+    @Test
+    public void should_return_ADV_when_addPoint() {
+        Game game = Game.builder()
+                .firstPlayerScore(SCORE_FORTY)
+                .secondPlayerScore(SCORE_FORTY)
+                .build();
+        matchCommandService.addPoint(game, 1);
+        Assert.assertEquals(ADV, game.getFirstPlayerScore());
+    }
+
+    @Test
+    public void should_return_DEUCE_when_addPoint() {
+        Game game = Game.builder()
+                .firstPlayerScore(SCORE_FORTY)
+                .secondPlayerScore(ADV)
+                .build();
+        matchCommandService.addPoint(game, 1);
+        Assert.assertEquals(DEUCE, game.getFirstPlayerScore());
+        Assert.assertEquals(DEUCE, game.getSecondPlayerScore());
+    }
+
+    @Test
+    public void should_return_true_when_isGameOver() {
+        TennisUtil.getLastGame(match).setComment(FIRST_PLAYER_GAME);
+        Assert.assertTrue(matchCommandService.isGameOver(match));
+    }
+
+    @Test
+    public void should_add_a_game_to_match_when_initNewGame() {
+        matchCommandService.initNewGame(match);
+        Assert.assertEquals(2, TennisUtil.getLastSet(match).getGames().size());
+    }
+
+    @Test
+    public void should_return_ADV_when_calculateScore() {
+        game.setFirstPlayerScore(SCORE_FORTY);
+        game.setSecondPlayerScore(SCORE_FORTY);
+        Assert.assertEquals(ADV, matchCommandService.calculateScore(game, 1));
+    }
+
+    @Test
+    public void should_return_DEUCE_when_checkDeuce() {
+        game.setFirstPlayerScore(SCORE_FORTY);
+        game.setSecondPlayerScore(ADV);
+        Assert.assertEquals(DEUCE, matchCommandService.checkDeuce(game, 1));
     }
 }

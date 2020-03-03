@@ -11,9 +11,9 @@ public class GameTO {
 
     private int number;
 
-    private int firstPlayerScore;
+    private String firstPlayerScore;
 
-    private int secondPlayerScore;
+    private String secondPlayerScore;
 
     private String comment;
 }

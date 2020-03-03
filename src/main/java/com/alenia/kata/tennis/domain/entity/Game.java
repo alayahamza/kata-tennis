@@ -27,10 +27,10 @@ public class Game {
     private int number;
 
     @Column(name = "FIRST_PLAYER_SCORE")
-    private int firstPlayerScore;
+    private String firstPlayerScore;
 
     @Column(name = "SECOND_PLAYER_SCORE")
-    private int secondPlayerScore;
+    private String secondPlayerScore;
 
     @Column(name = "COMMENT")
     private String comment;
