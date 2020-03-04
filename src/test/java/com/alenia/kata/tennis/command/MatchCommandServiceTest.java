@@ -27,6 +27,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.alenia.kata.tennis.domain.constant.TennisConstants.*;
 
@@ -114,15 +116,16 @@ public class MatchCommandServiceTest {
         Assert.assertEquals(1, match.getSets().get(0).getGames().size());
         Assert.assertEquals(SCORE_ZERO, match.getSets().get(0).getGames().get(0).getFirstPlayerScore());
         Assert.assertEquals(SCORE_ZERO, match.getSets().get(0).getGames().get(0).getSecondPlayerScore());
+        Assert.assertEquals(0, match.getFirstPlayerSets());
+        Assert.assertEquals(0, match.getSecondPlayerSets());
     }
 
     @Test
     public void should_return_FIFTEEN_when_addPoint() {
-        Game game = Game.builder()
-                .firstPlayerScore(SCORE_ZERO)
-                .secondPlayerScore(SCORE_FIFTEEN)
-                .build();
-        matchCommandService.addPoint(game, 1);
+        Game lastGame = TennisUtil.getLastGame(match);
+        lastGame.setFirstPlayerScore(SCORE_ZERO);
+        lastGame.setSecondPlayerScore(SCORE_FIFTEEN);
+        matchCommandService.addPoint(match, 1);
         Assert.assertEquals(SCORE_FIFTEEN, game.getFirstPlayerScore());
     }
 
@@ -150,21 +153,19 @@ public class MatchCommandServiceTest {
 
     @Test
     public void should_return_ADV_when_addPoint() {
-        Game game = Game.builder()
-                .firstPlayerScore(SCORE_FORTY)
-                .secondPlayerScore(SCORE_FORTY)
-                .build();
-        matchCommandService.addPoint(game, 1);
+        Game lastGame = TennisUtil.getLastGame(match);
+        lastGame.setFirstPlayerScore(SCORE_FORTY);
+        lastGame.setSecondPlayerScore(SCORE_FORTY);
+        matchCommandService.addPoint(match, 1);
         Assert.assertEquals(ADV, game.getFirstPlayerScore());
     }
 
     @Test
     public void should_return_DEUCE_when_addPoint() {
-        Game game = Game.builder()
-                .firstPlayerScore(SCORE_FORTY)
-                .secondPlayerScore(ADV)
-                .build();
-        matchCommandService.addPoint(game, 1);
+        Game lastGame = TennisUtil.getLastGame(match);
+        lastGame.setFirstPlayerScore(SCORE_FORTY);
+        lastGame.setSecondPlayerScore(ADV);
+        matchCommandService.addPoint(match, 1);
         Assert.assertEquals(DEUCE, game.getFirstPlayerScore());
         Assert.assertEquals(DEUCE, game.getSecondPlayerScore());
     }
@@ -193,5 +194,89 @@ public class MatchCommandServiceTest {
         game.setFirstPlayerScore(SCORE_FORTY);
         game.setSecondPlayerScore(ADV);
         Assert.assertEquals(DEUCE, matchCommandService.checkDeuce(game, 1));
+    }
+
+    @Test
+    public void should_mark_set_as_over_when_checkSetWinner() {
+        Set lastSet = TennisUtil.getLastSet(match);
+        lastSet.setFirstPlayerGames(6);
+        lastSet.setSecondPlayerGames(2);
+        matchCommandService.checkSetWinner(match, 1);
+        Assert.assertEquals(FIRST_PLAYER_SET, lastSet.getComment());
+    }
+
+    @Test
+    public void should_win_set_when_addPoint() {
+        Set lastSet = TennisUtil.getLastSet(match);
+        lastSet.getGames().
+                addAll(IntStream.rangeClosed(0, 5)
+                        .mapToObj(i -> new Game())
+                        .collect(Collectors.toList()));
+        TennisUtil.getLastGame(match).setFirstPlayerScore(SCORE_FORTY);
+        lastSet.setFirstPlayerGames(6);
+        lastSet.setSecondPlayerGames(2);
+        matchCommandService.addPoint(match, 1);
+        Assert.assertEquals(FIRST_PLAYER_SET, lastSet.getComment());
+    }
+
+    @Test
+    public void should_return_true_when_isSetOver() {
+        Set lastSet = TennisUtil.getLastSet(match);
+        lastSet.setComment(FIRST_PLAYER_SET);
+        Assert.assertTrue(matchCommandService.isSetOver(match));
+    }
+
+    @Test
+    public void should_create_a_new_set_when_initNewSet() {
+        matchCommandService.initNewSet(match);
+        Assert.assertEquals(2, match.getSets().size());
+    }
+
+    @Test(expected = TennisException.class)
+    public void should_throw_exception_when_addPoint_and_match_finished() throws TennisException {
+        match.setComment(FIRST_PLAYER_MATCH);
+        matchCommandService.addPointToFirstPlayer(1);
+    }
+
+    @Test
+    public void should_return_true_when_isMatchOver() {
+        match.setComment(FIRST_PLAYER_MATCH);
+        Assert.assertTrue(matchCommandService.isMatchOver(match));
+    }
+
+    @Test
+    public void first_player_should_be_the_winner_when_checkSetForFirstPlayer() {
+        TennisUtil.getLastSet(match).setFirstPlayerGames(6);
+        TennisUtil.getLastSet(match).setSecondPlayerGames(2);
+        match.setFirstPlayerSets(1);
+        matchCommandService.checkSetForFirstPlayer(match);
+        Assert.assertEquals(FIRST_PLAYER_SET, TennisUtil.getLastSet(match).getComment());
+        Assert.assertEquals(FIRST_PLAYER_MATCH, match.getComment());
+    }
+
+    @Test
+    public void second_player_should_be_the_winner_when_checkSetForSecondPlayer() {
+        TennisUtil.getLastSet(match).setFirstPlayerGames(2);
+        TennisUtil.getLastSet(match).setSecondPlayerGames(6);
+        match.setSecondPlayerSets(1);
+        matchCommandService.checkSetForSecondPlayer(match);
+        Assert.assertEquals(SECOND_PLAYER_SET, TennisUtil.getLastSet(match).getComment());
+        Assert.assertEquals(SECOND_PLAYER_MATCH, match.getComment());
+    }
+
+    @Test
+    public void should_mark_second_player_as_set_winner_when_updateSecondPlayerScore() {
+        Game lastGame = TennisUtil.getLastGame(match);
+        Set lastSet = TennisUtil.getLastSet(match);
+        matchCommandService.updateSecondPlayerScore(lastGame, lastSet);
+        Assert.assertEquals(SCORE_FIFTEEN, lastGame.getSecondPlayerScore());
+    }
+
+    @Test
+    public void should_mark_second_player_as_set_winner_when_updateFirstPlayerScore() {
+        Game lastGame = TennisUtil.getLastGame(match);
+        Set lastSet = TennisUtil.getLastSet(match);
+        matchCommandService.updateFirstPlayerScore(lastGame, lastSet);
+        Assert.assertEquals(SCORE_FIFTEEN, lastGame.getFirstPlayerScore());
     }
 }

@@ -19,5 +19,9 @@ public class MatchTO {
 
     private PlayerTO secondPlayer;
 
+    private int firstPlayerSets;
+
+    private int secondPlayerSets;
+
     private String comment;
 }

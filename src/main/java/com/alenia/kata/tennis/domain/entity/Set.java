@@ -31,4 +31,13 @@ public class Set {
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Game> games;
+
+    @Column(name = "FIRST_PLAYER_GAMES")
+    private int firstPlayerGames;
+
+    @Column(name = "SECOND_PLAYER_GAMES")
+    private int secondPlayerGames;
+
+    @Column(name = "COMMENT")
+    private String comment;
 }

@@ -30,6 +30,12 @@ public class Match {
     @Column(name = "COMMENT")
     private String comment;
 
+    @Column(name = "FIRST_PLAYER_SETS")
+    private int firstPlayerSets;
+
+    @Column(name = "SECOND_PLAYER_SETS")
+    private int secondPlayerSets;
+
     @OneToMany(cascade = CascadeType.ALL)
     private List<Set> sets;
 
