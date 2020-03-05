@@ -279,4 +279,34 @@ public class MatchCommandServiceTest {
         matchCommandService.updateFirstPlayerScore(lastGame, lastSet);
         Assert.assertEquals(SCORE_FIFTEEN, lastGame.getFirstPlayerScore());
     }
+
+    @Test
+    public void should_return_true_when_isTieScore() {
+        Set lastSet = TennisUtil.getLastSet(match);
+        match.setFirstPlayerSets(1);
+        match.setSecondPlayerSets(1);
+        lastSet.setFirstPlayerGames(6);
+        lastSet.setSecondPlayerGames(6);
+        Assert.assertTrue(matchCommandService.isTieScore(match));
+    }
+
+    @Test
+    public void should_apply_tie_break_when_applyTieBreakRule() throws TennisException {
+        Set lastSet = TennisUtil.getLastSet(match);
+        match.setFirstPlayerSets(1);
+        match.setSecondPlayerSets(1);
+        lastSet.setFirstPlayerGames(9);
+        lastSet.setSecondPlayerGames(7);
+        matchCommandService.applyTieBreakRule(match, 1);
+        Assert.assertEquals(FIRST_PLAYER_SET, lastSet.getComment());
+        Assert.assertEquals(FIRST_PLAYER_MATCH, match.getComment());
+    }
+
+    @Test
+    public void should_mark_first_player_as_winner_when_playerWinsSetAndMatch() {
+        Set lastSet = TennisUtil.getLastSet(match);
+        matchCommandService.playerWinsSetAndMatch(match, 1);
+        Assert.assertEquals(FIRST_PLAYER_SET, lastSet.getComment());
+        Assert.assertEquals(FIRST_PLAYER_MATCH, match.getComment());
+    }
 }

@@ -159,10 +159,14 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
     @Override
     public void checkSetWinner(Match match, int player) {
-        if (player == 1) {
-            checkSetForFirstPlayer(match);
+        if (!isTieScore(match)) {
+            if (player == 1) {
+                checkSetForFirstPlayer(match);
+            } else {
+                checkSetForSecondPlayer(match);
+            }
         } else {
-            checkSetForSecondPlayer(match);
+            applyTieBreakRule(match, player);
         }
     }
 
@@ -239,6 +243,53 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     @Override
     public boolean isMatchOver(Match match) {
         return FIRST_PLAYER_MATCH.equals(match.getComment()) || SECOND_PLAYER_MATCH.equals(match.getComment());
+    }
+
+    @Override
+    public boolean isTieScore(Match match) {
+        Set lastSet = TennisUtil.getLastSet(match);
+        return lastSet.getFirstPlayerGames() >= 6 && lastSet.getSecondPlayerGames() >= 6 &&
+                match.getFirstPlayerSets() == 1 && match.getSecondPlayerSets() == 1;
+    }
+
+    @Override
+    public void applyTieBreakRule(Match match, int player) {
+        Set lastSet = TennisUtil.getLastSet(match);
+        boolean firstPlayerHasTieBreak = lastSet.getFirstPlayerGames() >= DEFAULT_GAMES_COUNT && lastSet.getFirstPlayerGames() - lastSet.getSecondPlayerGames() == 2;
+        boolean secondPlayerHasTieBreak = lastSet.getSecondPlayerGames() >= DEFAULT_GAMES_COUNT && lastSet.getSecondPlayerGames() - lastSet.getFirstPlayerGames() == 2;
+
+        if (firstPlayerHasTieBreak) {
+            playerWinsSetAndMatch(match, player);
+        } else if (secondPlayerHasTieBreak) {
+            playerWinsSetAndMatch(match, player);
+        }
+    }
+
+    @Override
+    public void playerWinsSetAndMatch(Match match, int player) {
+        playerWinsSet(match, player);
+        playerWinsMatch(match, player);
+    }
+
+    @Override
+    public void playerWinsMatch(Match match, int player) {
+        if (player == 1) {
+            match.setComment(FIRST_PLAYER_MATCH);
+        } else {
+            match.setComment(SECOND_PLAYER_MATCH);
+        }
+    }
+
+    @Override
+    public void playerWinsSet(Match match, int player) {
+        Set lastSet = TennisUtil.getLastSet(match);
+        if (player == 1) {
+            match.setFirstPlayerSets(match.getFirstPlayerSets() + 1);
+            lastSet.setComment(FIRST_PLAYER_SET);
+        } else {
+            match.setSecondPlayerSets(match.getSecondPlayerSets() + 1);
+            lastSet.setComment(SECOND_PLAYER_SET);
+        }
     }
 
 }

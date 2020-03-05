@@ -40,4 +40,14 @@ public interface MatchCommandService {
     void initNewSet(Match match);
 
     boolean isMatchOver(Match match);
+
+    boolean isTieScore(Match match);
+
+    void applyTieBreakRule(Match match, int player);
+
+    void playerWinsSetAndMatch(Match match, int player);
+
+    void playerWinsMatch(Match match, int player);
+
+    void playerWinsSet(Match match, int player);
 }
