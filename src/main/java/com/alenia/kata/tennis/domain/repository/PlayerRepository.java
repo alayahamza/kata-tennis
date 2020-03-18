@@ -12,4 +12,6 @@ public interface PlayerRepository {
     Optional<Player> findById(long id);
 
     List<Player> findAll();
+
+    List<Player> saveAll(List<Player> players);
 }

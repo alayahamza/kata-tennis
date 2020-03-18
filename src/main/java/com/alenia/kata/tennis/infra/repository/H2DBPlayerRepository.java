@@ -32,4 +32,9 @@ public class H2DBPlayerRepository implements PlayerRepository {
     public List<Player> findAll() {
         return springDataPlayerRepository.findAll();
     }
+
+    @Override
+    public List<Player> saveAll(List<Player> players) {
+        return springDataPlayerRepository.saveAll(players);
+    }
 }

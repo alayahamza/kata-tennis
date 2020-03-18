@@ -10,6 +10,7 @@ import com.alenia.kata.tennis.domain.service.query.PlayerQueryService;
 import com.alenia.kata.tennis.domain.utils.TennisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 import static com.alenia.kata.tennis.domain.constant.TennisConstants.*;
 
 @Service
+@Transactional
 public class MatchCommandServiceImpl implements MatchCommandService {
 
     private final MatchQueryService matchQueryService;
