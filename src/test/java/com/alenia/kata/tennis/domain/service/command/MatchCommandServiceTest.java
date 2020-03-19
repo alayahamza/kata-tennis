@@ -1,4 +1,4 @@
-package com.alenia.kata.tennis.command;
+package com.alenia.kata.tennis.domain.service.command;
 
 import com.alenia.kata.tennis.domain.entity.Game;
 import com.alenia.kata.tennis.domain.entity.Match;
@@ -9,8 +9,6 @@ import com.alenia.kata.tennis.domain.repository.GameRepository;
 import com.alenia.kata.tennis.domain.repository.MatchRepository;
 import com.alenia.kata.tennis.domain.repository.PlayerRepository;
 import com.alenia.kata.tennis.domain.repository.SetRepository;
-import com.alenia.kata.tennis.domain.service.command.MatchCommandService;
-import com.alenia.kata.tennis.domain.service.command.MatchCommandServiceImpl;
 import com.alenia.kata.tennis.domain.service.query.MatchQueryServiceImpl;
 import com.alenia.kata.tennis.domain.service.query.PlayerQueryServiceImpl;
 import com.alenia.kata.tennis.domain.utils.TennisUtil;

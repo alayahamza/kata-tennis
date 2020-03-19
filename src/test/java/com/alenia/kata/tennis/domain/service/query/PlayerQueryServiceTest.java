@@ -1,10 +1,8 @@
-package com.alenia.kata.tennis.query;
+package com.alenia.kata.tennis.domain.service.query;
 
 import com.alenia.kata.tennis.domain.entity.Player;
 import com.alenia.kata.tennis.domain.exception.TennisException;
 import com.alenia.kata.tennis.domain.repository.PlayerRepository;
-import com.alenia.kata.tennis.domain.service.query.PlayerQueryService;
-import com.alenia.kata.tennis.domain.service.query.PlayerQueryServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

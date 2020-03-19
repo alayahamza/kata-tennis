@@ -1,4 +1,4 @@
-package com.alenia.kata.tennis.query;
+package com.alenia.kata.tennis.domain.service.query;
 
 import com.alenia.kata.tennis.domain.entity.Game;
 import com.alenia.kata.tennis.domain.entity.Match;
@@ -9,8 +9,6 @@ import com.alenia.kata.tennis.domain.repository.GameRepository;
 import com.alenia.kata.tennis.domain.repository.MatchRepository;
 import com.alenia.kata.tennis.domain.repository.PlayerRepository;
 import com.alenia.kata.tennis.domain.repository.SetRepository;
-import com.alenia.kata.tennis.domain.service.query.MatchQueryService;
-import com.alenia.kata.tennis.domain.service.query.MatchQueryServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
