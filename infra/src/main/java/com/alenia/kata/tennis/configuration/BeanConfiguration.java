@@ -36,4 +36,5 @@ public class BeanConfiguration {
     PlayerQueryService playerQueryService(PlayerRepository playerRepository) {
         return new PlayerQueryServiceImpl(playerRepository);
     }
+
 }
