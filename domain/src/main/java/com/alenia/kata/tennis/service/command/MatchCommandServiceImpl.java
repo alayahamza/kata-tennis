@@ -131,11 +131,12 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                 lastGame.setFirstPlayerScore(score);
                 break;
             case SCORE_ZERO:
-                lastGame.setFirstPlayerScore(score);
                 lastGame.setComment(SECOND_PLAYER_GAME);
                 lastSet.setSecondPlayerGames(lastSet.getSecondPlayerGames() + 1);
         }
-        lastGame.setSecondPlayerScore(score);
+        if (!SCORE_ZERO.equals(score)) {
+            lastGame.setSecondPlayerScore(score);
+        }
     }
 
     @Override
@@ -150,11 +151,12 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                 lastGame.setSecondPlayerScore(score);
                 break;
             case SCORE_ZERO:
-                lastGame.setSecondPlayerScore(score);
                 lastGame.setComment(FIRST_PLAYER_GAME);
                 lastSet.setFirstPlayerGames(lastSet.getFirstPlayerGames() + 1);
         }
-        lastGame.setFirstPlayerScore(score);
+        if (!SCORE_ZERO.equals(score)){
+            lastGame.setFirstPlayerScore(score);
+        }
     }
 
     @Override
