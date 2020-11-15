@@ -4,6 +4,7 @@ import com.alenia.kata.tennis.mapper.MatchMapper;
 import com.alenia.kata.tennis.to.MatchTO;
 import com.alenia.kata.tennis.exception.TennisException;
 import com.alenia.kata.tennis.service.command.MatchCommandService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/matches")
+@Slf4j
 public class MatchCommandController {
 
     private final MatchCommandService matchCommandService;
@@ -27,6 +29,7 @@ public class MatchCommandController {
     @PostMapping(value = "firstPlayer/{firstPlayerId}/secondPlayer/{secondPlayerId}")
     public ResponseEntity<MatchTO> create(@PathVariable long firstPlayerId, @PathVariable long secondPlayerId)
             throws TennisException {
+        log.info("Creating match with first player id : " + firstPlayerId + " and second player id : " + secondPlayerId);
         return ResponseEntity.ok()
                 .body(matchMapper.toMatchTO(matchCommandService.create(firstPlayerId, secondPlayerId)));
     }
